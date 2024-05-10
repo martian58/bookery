@@ -9,6 +9,7 @@
 #include <openssl/evp.h>
 
 
+
 #define DATABASE_FILE "bookshop.db"
 #define MAX_TITLE_LENGTH 100
 #define MAX_AUTHOR_LENGTH 100
@@ -356,6 +357,88 @@ void displayBooks() {
     sqlite3_finalize(stmt);
     sqlite3_close(db);
 }
+//********************************************************************************************************************************************************
+
+//Display users
+
+void displayUsers() {
+    if(userRole != 0){
+        printf("%sYou dont have permission for this action!\n this incident will be reported.\n%s",RED,RESET);
+    }else{
+        sqlite3 *db;
+        sqlite3_stmt *stmt;
+        int return_code;
+
+        return_code = sqlite3_open(DATABASE_FILE, &db);
+        if (return_code != SQLITE_OK) {
+            fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
+            sqlite3_close(db);
+            return;
+        }
+
+        printf("\n********** List of Users **************\n");
+
+        const char *sql = "SELECT username, email, role FROM users;";
+        return_code = sqlite3_prepare_v2(db, sql, -1, &stmt, 0);
+        if (return_code != SQLITE_OK) {
+            fprintf(stderr, "Failed to execute statement: %s\n", sqlite3_errmsg(db));
+            sqlite3_close(db);
+            return;
+        }
+
+        // Calculate maximum widths for each column
+        int max_user_width = 0;
+        int max_email_width = 0;
+        int max_role_width = 5;
+        
+
+        while ((return_code = sqlite3_step(stmt)) == SQLITE_ROW) {
+            max_user_width = fmax(max_user_width, (int)strlen((const char *)sqlite3_column_text(stmt, 0)));
+            max_email_width = fmax(max_email_width, (int)strlen((const char *)sqlite3_column_text(stmt, 1)));
+            
+        }
+
+        printf("%s",BLUE);
+        for(int i =0;i < (max_user_width + max_email_width + max_role_width) + 8;i++){
+            printf("-");
+        }
+        printf("%s\n",RESET);
+
+        // Print column headers
+        printf("%s%-*s | %-*s | %-*s |%s\n",
+            BLUE,
+            max_user_width, "User",
+            max_email_width, "Email",
+            max_role_width,"Role",
+                RESET);
+
+
+        printf("%s",BLUE);
+        for(int i =0;i < (max_user_width + max_email_width + max_role_width) + 8;i++){
+            printf("-");
+        }
+        printf("%s\n",RESET);
+
+        // Print user data
+        sqlite3_reset(stmt); // Reset the statement to re-execute
+        while ((return_code = sqlite3_step(stmt)) == SQLITE_ROW) {
+            printf("%-*s | %-*s | %-*s | \n",
+                max_user_width, (const char *)sqlite3_column_text(stmt, 0),
+                max_email_width, (const char *)sqlite3_column_text(stmt, 1),
+                max_role_width, (const char *)sqlite3_column_text(stmt, 2));
+
+            for(int i =0;i < (max_user_width + max_email_width + max_role_width) + 8;i++){
+                printf("-");
+            }
+            printf("\n");
+            
+        }
+
+        sqlite3_finalize(stmt);
+        sqlite3_close(db);   
+    }
+
+}
 
 //********************************************************************************************************************************************************
 
@@ -508,15 +591,18 @@ void updateBook() {
     }
 
     char searchTitle[MAX_TITLE_LENGTH];
-    printf("Enter the title of the book to update: ");
-    scanf(" %[^\n]s", searchTitle);
+    do{
+        printf("Enter the title of the book to update: ");
+        scanf(" %[^\n]s", searchTitle);
+    }while(!validateTitle(searchTitle));
+
 
     struct Book updatedBook;
 
     do{
         printf("Enter new title: ");
         scanf(" %[^\n]s", updatedBook.title);
-    }while(true);
+    }while(!validateTitle(updatedBook.title));
 
     printf("Enter new author: ");
     scanf(" %[^\n]s", updatedBook.author);
@@ -550,7 +636,63 @@ void updateBook() {
     sqlite3_close(db);
 }
 
+//*******************************************************************************************************************************************
 
+/*
+ Update user
+*/
+
+void updateUser() {
+    sqlite3 *db;
+    char *errMsg = 0;
+    int return_code;
+
+    return_code = sqlite3_open(DATABASE_FILE, &db);
+    if (return_code) {
+        fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
+        sqlite3_close(db);
+        return;
+    }
+
+    char searchUser[MAX_TITLE_LENGTH];
+    do{
+        printf("Enter the user to update: ");
+        scanf(" %[^\n]s", searchUser);
+    }while(!validateTitle(searchUser));
+
+
+    struct User updatedUser;
+
+    do{
+        printf("Enter new title: ");
+        scanf(" %[^\n]s", updatedUser.username);
+    }while(!validateTitle(updatedUser.username));
+
+    printf("Enter new author: ");
+    scanf(" %[^\n]s", updatedUser.email);
+    printf("Enter new genre: ");
+    scanf(" %[^\n]d", updatedUser.role);
+
+    char sql[1000];
+    sprintf(sql, "UPDATE users SET username=?, email=?, role=? WHERE username=?;");
+    
+    sqlite3_stmt *stmt;
+    sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
+    sqlite3_bind_text(stmt, 1, updatedUser.username, -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 2, updatedUser.email, -1, SQLITE_STATIC);
+    sqlite3_bind_int(stmt, 3, updatedUser.role);
+    sqlite3_bind_text(stmt, 4, searchUser, -1, SQLITE_STATIC);
+
+    return_code = sqlite3_step(stmt);
+    if (return_code != SQLITE_DONE) {
+        fprintf(stderr, "SQL error: %s\n", sqlite3_errmsg(db));
+    } else {
+        printf("Book details updated successfully.\n");
+    }
+
+    sqlite3_finalize(stmt);
+    sqlite3_close(db);
+}
 //***********************************************************************************************************************************************
 
 // Sell Book
@@ -588,6 +730,89 @@ void sellBook() {
 
     sqlite3_close(db);
 }
+
+
+//************************************************************************************************************************************
+
+// Delete a book.
+
+void delBook(int mode){
+    if(userRole != 0){
+        printf("%sYou dont have permission for this action!\n this incident will be reported.\n%s",RED,RESET);
+    }else{
+        sqlite3 *db;
+        char *errMsg = 0;
+        int return_code;
+
+        return_code = sqlite3_open(DATABASE_FILE, &db);
+        if (return_code) {
+            fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
+            sqlite3_close(db);
+            return;
+        }
+        if(mode == 1){
+            
+            char del_book[MAX_TITLE_LENGTH];
+            do{
+                printf("Enter the book to delete: ");
+                scanf(" %[^\n]s", &del_book);
+            }while(!validateUsername(del_book));
+
+
+            char sql[1000];
+            sprintf(sql, "DELETE FROM books WHERE title=?;");
+            
+            sqlite3_stmt *stmt;
+            sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
+            sqlite3_bind_text(stmt, 1, del_book, -1, SQLITE_STATIC);
+
+
+            return_code = sqlite3_step(stmt);
+            if (return_code != SQLITE_DONE) {
+                fprintf(stderr, "SQL error: %s\n", sqlite3_errmsg(db));
+            } else {
+                printf("Book deleted successfully.\n");
+            } 
+
+            sqlite3_finalize(stmt);
+            sqlite3_close(db);
+        }
+        else if(mode ==0){
+            char* choice;
+            printf("%sDelete all books(yes/no): %s",YELLOW,RESET);
+            fgets(choice, sizeof(choice), stdin); 
+            
+            // Remove newline character if present.
+            if (strlen(choice) > 0 && choice[strlen(choice) - 1] == '\n') {
+                choice[strlen(choice) - 1] = '\0';
+            }
+
+            if(strcmp(choice,"yes") == 0){
+                char sql[1000];
+                sprintf(sql, "DELETE FROM books;");
+                
+                sqlite3_stmt *stmt;
+                sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
+
+                return_code = sqlite3_step(stmt);
+                if (return_code != SQLITE_DONE) {
+                    fprintf(stderr, "SQL error: %s\n", sqlite3_errmsg(db));
+                } else {
+                    printf("%sAll books deleted successfully.\n%s",GREEN,RESET);
+                }
+                sqlite3_finalize(stmt);
+                sqlite3_close(db);
+            }else{
+                printf("Deletion aborted.\n");
+            }
+ 
+        }
+    
+    }
+
+}
+
+
 
 //***********************************************************************************************************************************
 
@@ -745,11 +970,11 @@ void hashPassword(const char *password, unsigned char *hash) {
     EVP_MD_CTX_free(mdctx);
 }
 
-
+//
 // Function to add users.
 void addUser() {
     if(userRole != 0){
-        printf("You dont have permission for this action!\n this incident will be reported.\n");
+        printf("%sYou dont have permission for this action!\n this incident will be reported.\n%s",RED,RESET);
     }else{
         char *passwordPtr,*password2Ptr;
         char password[100], password2[100];
@@ -824,7 +1049,50 @@ void addUser() {
 
 }
 
+// Delete a user.
 
+void delUser(){
+    if(userRole != 0){
+        printf("%sYou dont have permission for this action!\n this incident will be reported.\n%s",RED,RESET);
+    }else{
+        sqlite3 *db;
+        char *errMsg = 0;
+        int return_code;
+
+        return_code = sqlite3_open(DATABASE_FILE, &db);
+        if (return_code) {
+            fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
+            sqlite3_close(db);
+            return;
+        }
+
+        char del_username[MAX_AUTHOR_LENGTH];
+        do{
+            printf("Enter the user to delete: ");
+            scanf(" %[^\n]s", &del_username);
+        }while(!validateUsername(del_username));
+
+
+        char sql[1000];
+        sprintf(sql, "DELETE FROM users WHERE username=?;");
+        
+        sqlite3_stmt *stmt;
+        sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
+        sqlite3_bind_text(stmt, 1, del_username, -1, SQLITE_STATIC);
+
+
+        return_code = sqlite3_step(stmt);
+        if (return_code != SQLITE_DONE) {
+            fprintf(stderr, "SQL error: %s\n", sqlite3_errmsg(db));
+        } else {
+            printf("User deleted successfully.\n");
+        }
+
+        sqlite3_finalize(stmt);
+        sqlite3_close(db);
+    }
+
+}
 
 
 bool authenticateUser() {
@@ -919,12 +1187,14 @@ void help(const char *command) {
         printf("4. del book - Delete a book\n");
         printf("5. del allbooks - Delete all the books(%sno return%s).\n",RED,RESET);
         printf("6. show books - Display all books\n");
-        printf("7. show users - Display all users\n");
-        printf("7. search book - search for a book.\n");
-        printf("7. update book - Update the details of a book.\n");
-        printf("8. back - Go back to the previous menu\n");
-        printf("9. login - Login to another account.\n");
-        printf("10.exit - Exit the program\n");
+        printf("7. show users - Display all users\n");// Ceate this 
+        printf("8. search book - search for a book.\n");
+        printf("9. update book - Update the details of a book.\n");
+        printf("10. update user - Update the details of a user.\n"); //Create this
+        printf("11. report sales - Generate sales report.\n"); // 5dk geri gelecem mende :)
+        printf("12.back - Go back to the previous menu\n");
+        printf("13.login - Login to another account.\n");
+        printf("14.exit - Exit the program\n");
     } 
     else {
         printf("Invalid command: %s\n", command);
@@ -946,11 +1216,6 @@ void advancedCLI() {
             command[strlen(command) - 1] = '\0';
         }
         
-        if (strcmp(command, "exit") == 0) {
-            printf("Exiting...\n");
-            break;
-        }
-        
         if (strcmp(command, "add user") == 0) {
             // Call function to add user
             addUser();
@@ -963,7 +1228,11 @@ void advancedCLI() {
         } else if (strcmp(command, "update book") == 0) {
             // Call function to login
             updateBook();
-        } else if (strcmp(command, "sell book") == 0) {
+        } else if (strcmp(command, "update user") == 0) {
+            // Call function to login
+            updateUser();   
+        }
+         else if (strcmp(command, "sell book") == 0) {
             // Call function to login
             sellBook();
         }  
@@ -972,12 +1241,16 @@ void advancedCLI() {
             authenticateUser();
         }
         else if (strcmp(command, "del user") == 0) {
-            printf("Deleting user...\n");
             // Call function to delete user
+            delUser();
         } else if (strcmp(command, "del book") == 0) {
-            printf("Deleting book...\n");
             // Call function to delete book
-        } else if (strcmp(command, "help add") == 0) {
+            delBook(1);
+        }else if (strcmp(command, "del allbooks") == 0) {
+            // Call function to delete all books
+            delBook(0);
+        }
+         else if (strcmp(command, "help add") == 0) {
             help("add");
         } else if (strcmp(command, "help del") == 0) {
             help("del");
@@ -1018,8 +1291,8 @@ void advancedCLI() {
             // Call function to display all books
             displayBooks();
         } else if (strcmp(command, "show users") == 0) {
-            printf("Displaying all users...\n");
             // Call function to display all users
+            displayUsers();
         }else if (strcmp(command, "search book") == 0) {
             // Call function to display all users
             searchBook();
