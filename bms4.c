@@ -59,7 +59,7 @@ void clearInputBuffer() {
 bool validateTitle(const char *title) {
 
     if (title[0] == '\0' || strlen(title) > MAX_TITLE_LENGTH) {
-        printf("Title cannot be empty. Please try again.\n");
+        printf("%sTitle was wrong. Please try again.\n%s", RED,RESET);
         return false;
     }
     return true;
@@ -213,7 +213,7 @@ void addBook() {
     int return_code;
 
     return_code = sqlite3_open(DATABASE_FILE, &db);
-    if (return_code) {
+    if (return_code != SQLITE_OK) {
         fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
         sqlite3_close(db);
         return;
@@ -512,8 +512,12 @@ void updateBook() {
     scanf(" %[^\n]s", searchTitle);
 
     struct Book updatedBook;
-    printf("Enter new title: ");
-    scanf(" %[^\n]s", updatedBook.title);
+
+    do{
+        printf("Enter new title: ");
+        scanf(" %[^\n]s", updatedBook.title);
+    }while(true);
+
     printf("Enter new author: ");
     scanf(" %[^\n]s", updatedBook.author);
     printf("Enter new genre: ");
@@ -524,19 +528,28 @@ void updateBook() {
     scanf("%d", &updatedBook.quantity_available);
 
     char sql[1000];
-    sprintf(sql, "UPDATE books SET title='%s', author='%s', genre='%s', price=%.2f, quantity_available=%d WHERE title='%s';",
-            updatedBook.title, updatedBook.author, updatedBook.genre, updatedBook.price, updatedBook.quantity_available, searchTitle);
+    sprintf(sql, "UPDATE books SET title=?, author=?, genre=?, price=?, quantity_available=? WHERE title=?;");
+    
+    sqlite3_stmt *stmt;
+    sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
+    sqlite3_bind_text(stmt, 1, updatedBook.title, -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 2, updatedBook.author, -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 3, updatedBook.genre, -1, SQLITE_STATIC);
+    sqlite3_bind_double(stmt, 4, updatedBook.price);
+    sqlite3_bind_int(stmt, 5, updatedBook.quantity_available);
+    sqlite3_bind_text(stmt, 6, searchTitle, -1, SQLITE_STATIC);
 
-    return_code = sqlite3_exec(db, sql, 0, 0, &errMsg);
-    if (return_code != SQLITE_OK) {
-        fprintf(stderr, "SQL error: %s\n", errMsg);
-        sqlite3_free(errMsg);
+    return_code = sqlite3_step(stmt);
+    if (return_code != SQLITE_DONE) {
+        fprintf(stderr, "SQL error: %s\n", sqlite3_errmsg(db));
     } else {
         printf("Book details updated successfully.\n");
     }
 
+    sqlite3_finalize(stmt);
     sqlite3_close(db);
 }
+
 
 //***********************************************************************************************************************************************
 
@@ -732,7 +745,8 @@ void hashPassword(const char *password, unsigned char *hash) {
     EVP_MD_CTX_free(mdctx);
 }
 
-// Function to add a user
+
+// Function to add users.
 void addUser() {
     if(userRole != 0){
         printf("You dont have permission for this action!\n this incident will be reported.\n");
@@ -788,21 +802,28 @@ void addUser() {
         }
 
         char sql[1000];
-        sprintf(sql, "INSERT INTO users (username, password, email, role) VALUES ('%s', '%s', '%s', %d);",
-                newUser.username, hashed_password_str, newUser.email, newUser.role);
+        sprintf(sql, "INSERT INTO users (username, password, email, role) VALUES (?, ?, ?, ?);");
 
-        return_code = sqlite3_exec(db, sql, 0, 0, &errMsg);
-        if (return_code != SQLITE_OK) {
-            fprintf(stderr, "SQL error: %s\n", errMsg);
-            sqlite3_free(errMsg);
+        sqlite3_stmt *stmt;
+        sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
+        sqlite3_bind_text(stmt, 1, newUser.username, -1, SQLITE_STATIC);
+        sqlite3_bind_text(stmt, 2, hashed_password_str, -1, SQLITE_STATIC);
+        sqlite3_bind_text(stmt, 3, newUser.email, -1, SQLITE_STATIC);
+        sqlite3_bind_int(stmt, 4, newUser.role);
+
+        return_code = sqlite3_step(stmt);
+        if (return_code != SQLITE_DONE) {
+            fprintf(stderr, "SQL error: %s\n", sqlite3_errmsg(db));
         } else {
             printf("User added successfully.\n");
         }
 
+        sqlite3_finalize(stmt);
         sqlite3_close(db);
     }
 
 }
+
 
 
 
@@ -829,16 +850,14 @@ bool authenticateUser() {
     for (int i = 0; i < SHA256_DIGEST_LENGTH; i++) {
         sprintf(&hashed_password_str[i * 2], "%02x", hashed_password[i]);
     }
+
     // Prepare SQL statement to query for user credentials and role
-    sprintf(sql, "SELECT role FROM users WHERE username='%s' AND password='%s';", username, hashed_password_str);   
+    sprintf(sql, "SELECT role FROM users WHERE username=? AND password=?;");
 
-    return_code = sqlite3_prepare_v2(db, sql, -1, &stmt, 0);
-    if (return_code != SQLITE_OK) {
-        fprintf(stderr, "Failed to execute statement: %s\n", sqlite3_errmsg(db));
-        return false;
-    }
+    sqlite3_prepare_v2(db, sql, -1, &stmt, 0);
+    sqlite3_bind_text(stmt, 1, username, -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 2, hashed_password_str, -1, SQLITE_STATIC);
 
-    // Execute the prepared statement
     return_code = sqlite3_step(stmt);
     if (return_code == SQLITE_ROW) {
         int role = sqlite3_column_int(stmt, 0);
@@ -855,6 +874,7 @@ bool authenticateUser() {
         return false;
     }
 }
+
 
 //**********************************************************************************************************************************
 
