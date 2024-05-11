@@ -81,6 +81,24 @@ bool validateQuantity(int quantity) {
     return true;
 }
 
+// Function to validate days
+bool validateDays(int days) {
+
+    if (days < 0) {
+        printf("%sDays must be non-negative. Please try again.\n%s");
+        return false;
+    }
+    return true;
+}
+// Function to validate ID
+bool validateID(int id) {
+
+    if (id < 0) {
+        printf("%sDays must be non-negative. Please try again.\n%s");
+        return false;
+    }
+    return true;
+}
 // Validate Username
 bool validateUsername(const char *username) {
     // Username must not be empty and must have at least 4 characters
@@ -167,6 +185,7 @@ void introBookery() {
 
         usleep(200000); // Sleep for 0.2 seconds.
     }
+    printf("\n\n%sVersion: %s%s\n",PINK,VERSION,RESET);
 
 
     printf("\n\n");
@@ -182,33 +201,42 @@ void printMenu() {
     printf("5. Sell a Book\n");
     printf("6. Generate Sales Report\n");
     printf("7. Rent a Book\n");
-    printf("8. Generate Rental Report\n");
-    printf("9. Advanced CLI\n");
+    printf("8. Recall a Rent\n");
+    printf("9. Display all Rents\n");
+    printf("10. Search for a rent\n");
+    printf("11. Generate Rental Report\n");
+    printf("12. Advanced CLI\n");
     printf("0. Exit\n");
     printf("******************************************************\n");
     printf("Enter your choice: ");
 }
 
 void help(const char *command) {
+
     if (strcmp(command, "del") == 0) {
         printf("Usage: del [user/book/allbooks]\n");
         printf("Description: Delete a user, a book or all the books.\n");
+
     } else if (strcmp(command, "add") == 0) {
         printf("Usage: add [user/book]\n");
         printf("Description: Add a new user or a new book.\n");
+
     } else if (strcmp(command, "login") == 0) {
         printf("Usage: login \n");
         printf("Description: Login to another account.\n");
+
     } else if (strcmp(command, "update") == 0) {
-        printf("Usage: update [book] \n");
-        printf("Description: Update the details of a book.\n");
+        printf("Usage: update [book/user] \n");
+        printf("Description: Update the details of a book or a user.\n");
     }
     else if (strcmp(command, "show") == 0) {
-        printf("Usage: show [users/books]\n");
-        printf("Description: Display all books or users.\n");
+        printf("Usage: show [users/books/rents]\n");
+        printf("Description: Display all books, users or rent records.\n");
+
     }else if (strcmp(command, "search") == 0) {
-        printf("Usage: search [book]\n");
-        printf("Description: Search for a book.\n");
+        printf("Usage: search [book/rent]\n");
+        printf("Description: Search for a book or a rent record.\n");
+
     }else if (strcmp(command, "sell") == 0) {
         printf("Usage: sell [book]\n");
         printf("Description: Sell a book.\n");
@@ -218,21 +246,26 @@ void help(const char *command) {
         printf("Description: Rent or recall a book\n");
     }
      else if(strcmp(command,"all") == 0){
-        printf("Available commands:\n\n");
-        printf("1. add user - Add a new user\n");
-        printf("2. add book - Add a new book\n");
-        printf("3. del user - Delete a user\n");
-        printf("4. del book - Delete a book\n");
-        printf("5. del allbooks - Delete all the books(%sno return%s).\n",RED,RESET);
-        printf("6. show books - Display all books\n");
-        printf("7. show users - Display all users\n");// Ceate this 
-        printf("8. search book - search for a book.\n");
-        printf("9. update book - Update the details of a book.\n");
-        printf("10. update user - Update the details of a user.\n"); //Create this
-        printf("11. report sales - Generate sales report.\n"); // 5dk geri gelecem mende :)
-        printf("12.back - Go back to the previous menu\n");
-        printf("13.login - Login to another account.\n");
-        printf("14.exit - Exit the program\n");
+        printf("%s*****Available commands******\n\n%s",BLUE,RESET);
+        printf("1.    add user        -       Add a new user\n");
+        printf("2.    add book        -       Add a new book\n");
+        printf("3.    del user        -       Delete a user\n");
+        printf("4.    del book        -       Delete a book\n");
+        printf("5.    del allbooks    -       Delete all the books(%sno return%s).\n",RED,RESET);
+        printf("6.    show books      -       Display all books\n");
+        printf("7.    show users      -       Display all users\n");
+        printf("8.    show rents      -       Display all rents\n");
+        printf("9.    search book     -       Search for a book.\n");
+        printf("10.   search rent     -       Search for a rent record\n");
+        printf("11.   update book     -       Update the details of a book.\n");
+        printf("12.   update user     -       Update the details of a user.\n"); 
+        printf("12.   rent book       -       Rent a book\n");
+        printf("14.   rent recall     -       Recall a rented book\n");
+        printf("15.   report sales    -       Generate sales report.\n"); 
+        printf("16.   report rents    -       Generate sales report.\n"); 
+        printf("17.   back            -       Go back to the previous menu\n");
+        printf("18.   login           -       Login to another account.\n");
+        printf("19.   exit            -       Exit the program\n");
     } 
     else {
         printf("%sInvalid command:%s %s\n",RED,RESET,command);

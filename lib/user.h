@@ -143,7 +143,7 @@ void addUser() {
             password2Ptr = getpass("Enter password again: ");
             strcpy(password2, password2Ptr);
             if(strcmp(password,password2) != 0){
-                printf("Passwords don't match\n");
+                printf("%sPasswords don't match!%s\n",RED,RESET);
             }else{
                 strcpy(newUser.password, password);
             }
@@ -182,7 +182,7 @@ void addUser() {
         if (return_code != SQLITE_DONE) {
             fprintf(stderr, "SQL error: %s\n", sqlite3_errmsg(db));
         } else {
-            printf("User added successfully.\n");
+            printf("%sUser added successfully.%s\n",GREEN,RESET);
         }
 
         sqlite3_finalize(stmt);
@@ -227,7 +227,7 @@ void delUser(){
         if (return_code != SQLITE_DONE) {
             fprintf(stderr, "SQL error: %s\n", sqlite3_errmsg(db));
         } else {
-            printf("User deleted successfully.\n");
+            printf("%sUser deleted successfully.%s\n",GREEN,RESET);
         }
 
         sqlite3_finalize(stmt);

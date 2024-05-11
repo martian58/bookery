@@ -24,6 +24,7 @@ struct Book {
 };
 
 struct Rent {
+    int id;
     char title[MAX_TITLE_LENGTH];
     char customer_name[MAX_AUTHOR_LENGTH];
     char customer_phone[MAX_AUTHOR_LENGTH];
@@ -207,7 +208,9 @@ void searchBook() {
     printf("Enter search term (title, author, or genre): ");
     scanf(" %[^\n]s", searchTerm);
 
-    const char *sql = "SELECT title, author, genre, price, quantity_available, quantity_rented, quantity_sold FROM books WHERE title LIKE ? OR author LIKE ? OR genre LIKE ?;";
+    const char *sql = "SELECT title, author, genre, price, quantity_available, quantity_rented,\
+     quantity_sold FROM books WHERE title LIKE ? OR author LIKE ? OR genre LIKE ?;";
+     
     return_code = sqlite3_prepare_v2(db, sql, -1, &stmt, 0);
     if (return_code != SQLITE_OK) {
         fprintf(stderr, "Failed to execute statement: %s\n", sqlite3_errmsg(db));
@@ -506,20 +509,7 @@ void delBook(int mode){
 
 //****************************************************************************************************************************************
 
-/*
-  Rent a book.
-
-    const char *sql_rents = "CREATE TABLE IF NOT EXISTS rents ("
-                            "id INTEGER PRIMARY KEY AUTOINCREMENT,"
-                            "title TEXT NOT NULL,"  
-                            "Name TEXT NOT NULL,"
-                            "Phone TEXT NOT NULL,"
-                            "quantity_rented INTEGER,"
-                            "rented_for_days INTEGER,"
-                            "rent_date TEXT NOT NULL,"
-                            "return_date TEXT"
-                            ");";
-*/
+//Rent a book
 
 void rentBook() {
     sqlite3 *db;
@@ -533,31 +523,365 @@ void rentBook() {
         return;
     }
 
-    char rentTitle[MAX_TITLE_LENGTH];
+    struct Rent newRent;
+    char current_date[11]; // 10 characters for the date + 1 for the null terminator
+    time_t t = time(NULL);
+
+    struct tm *today = localtime(&t);
+    
+    strftime(current_date, sizeof(current_date), "%d/%m/%Y", today);
+
+    strcpy(newRent.rented_date, current_date); 
+
     do{
         printf("Enter the title of the book to rent: ");
-        scanf(" %[^\n]s", rentTitle);
-    }while (!validateTitle(rentTitle));
+        scanf(" %[^\n]s", &newRent.title);
+    }while (!validateTitle(newRent.title));
     
     do{
         printf("Enter name of the customer: ");
-        scanf
-    }
+        // scanf("%s",&newRent.customer_name);
+        // printf("bms-> ");
+        clearInputBuffer();
+        fgets(newRent.customer_name, sizeof(newRent.customer_name), stdin); 
+        
+        // Remove newline character if present.
+        if (strlen(newRent.customer_name) > 0 && newRent.customer_name[strlen(newRent.customer_name) - 1] == '\n') {
+            newRent.customer_name[strlen(newRent.customer_name ) - 1] = '\0';
+        }
+    }while (!validateUsername(newRent.customer_name));
 
-    int days;
-    printf("Enter number of days to rent: ");
-    scanf("%d", &days);
+    printf("Enter phone number of customer: ");
+    scanf("%s",&newRent.customer_phone);
+  
+    do{
+        printf("Enter number of days to rent: ");
+        scanf("%d", &newRent.rented_for_days);
+    }while(!validateDays(newRent.rented_for_days));
+
+    today->tm_mday += newRent.rented_for_days;
+    mktime(today);
+
+    char return_date[11]; 
+    strftime(return_date, sizeof(return_date), "%d/%m/%Y", today);
+
+    strcpy(newRent.return_date, return_date); 
+    newRent.quantity_rented = 1;
 
     char sql[1000];
     char sql2[1000];
-    sprintf(sql, "UPDATE books SET quantity_rented = quantity_rented + 1, quantity_available = quantity_available - 1 WHERE title='%s';", rentTitle);
+    sprintf(sql, "UPDATE books SET quantity_rented = quantity_rented + 1, quantity_available = quantity_available - 1 WHERE title='%s';", newRent.title);
+    sprintf(sql2, "INSERT INTO rents (title, Name, Phone, quantity_rented, rented_for_days, rent_date, return_date) VALUES ('%s', '%s', '%s', '%d', '%d', '%s', '%s');",
+            newRent.title, newRent.customer_name, newRent.customer_phone, newRent.quantity_rented, newRent.rented_for_days,newRent.rented_date,newRent.return_date);
 
     return_code = sqlite3_exec(db, sql, 0, 0, &errMsg);
     if (return_code != SQLITE_OK) {
         fprintf(stderr, "SQL error: %s\n", errMsg);
         sqlite3_free(errMsg);
     } else {
-        printf("%sBook rented successfully for %d days.\n%s",GREEN, days,RESET);
+        printf("%sBook rented successfully for %d days.\n%s",GREEN, newRent.rented_for_days,RESET);
+    }
+
+    return_code = sqlite3_exec(db, sql2, 0, 0, &errMsg);
+    if (return_code != SQLITE_OK) {
+        fprintf(stderr, "SQL error: %s\n", errMsg);
+        sqlite3_free(errMsg);
+    } 
+
+    sqlite3_close(db);
+}
+
+//**********************************************************************************************************************
+
+// Display rents
+void displayRent() {
+    sqlite3 *db;
+    sqlite3_stmt *stmt;
+    int return_code;
+
+    return_code = sqlite3_open(DATABASE_FILE, &db);
+    if (return_code != SQLITE_OK) {
+        fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
+        sqlite3_close(db);
+        return;
+    }
+
+    printf("\n********** List of Rents **************\n");
+
+    const char *sql = "SELECT id, title, Name, Phone, quantity_rented, rented_for_days, rent_date, return_date FROM rents;";
+    return_code = sqlite3_prepare_v2(db, sql, -1, &stmt, 0);
+    if (return_code != SQLITE_OK) {
+        fprintf(stderr, "Failed to execute statement: %s\n", sqlite3_errmsg(db));
+        sqlite3_close(db);
+        return;
+    }
+
+    // Calculate maximum widths for each column
+    int max_title_width = 0;
+    int max_name_width = 0;
+    int max_phone_width = 0;
+    int max_qty_rented = 0;
+    int max_rfd_width = 17;
+    int max_rentdate_width = 0;
+    int max_returndate_width = 0;
+
+
+    while ((return_code = sqlite3_step(stmt)) == SQLITE_ROW) {  
+        max_title_width = fmax(max_title_width, (int)strlen((const char *)sqlite3_column_text(stmt, 1)));
+        max_name_width = fmax(max_name_width, (int)strlen((const char *)sqlite3_column_text(stmt, 2)));
+        max_phone_width = fmax(max_phone_width, (int)strlen((const char *)sqlite3_column_text(stmt, 3)));
+        max_qty_rented = fmax(max_qty_rented, sqlite3_column_int(stmt, 4));
+        max_rentdate_width = fmax(max_rentdate_width, (int)strlen((const char *)sqlite3_column_text(stmt, 6)));
+        max_returndate_width = fmax(max_returndate_width, (int)strlen((const char *)sqlite3_column_text(stmt, 7)));
+    }
+
+    printf("%s",BLUE);
+    for(int i =0;i < (max_title_width + max_name_width + max_phone_width + 90);i++){
+        printf("-");
+    }
+    printf("%s\n",RESET);
+
+    // Print column headers
+    printf("%s %-7s | %-*s | %-*s | %-*s | %-6s | %-15s | %-18s | %s |%s\n",
+           BLUE,"Id",
+           max_title_width, "Title",
+           max_name_width, "Name",
+           max_phone_width, "Phone",
+           "Quantity Rented",
+           "Rented for Days",
+           "Rent Date",
+           "Return Date",
+            RESET);
+
+
+    printf("%s",BLUE);
+    for(int i =0;i < (max_title_width + max_name_width + max_phone_width + 90);i++){
+        printf("-");
+    }
+    printf("%s\n",RESET);
+
+    // Print rent data
+    sqlite3_reset(stmt); // Reset the statement to re-execute
+    while ((return_code = sqlite3_step(stmt)) == SQLITE_ROW) {
+        printf("%-8d | %-*s | %-*s | %-*s | %-15d | %-15d | %-18s | %-11s |\n",
+               sqlite3_column_int(stmt, 0),
+               max_title_width, (const char *)sqlite3_column_text(stmt, 1),
+               max_name_width, (const char *)sqlite3_column_text(stmt, 2),
+               max_phone_width, (const char *)sqlite3_column_text(stmt, 3),
+               sqlite3_column_int(stmt, 4),
+               sqlite3_column_int(stmt, 5),
+               sqlite3_column_text(stmt, 6),
+               sqlite3_column_text(stmt, 7));
+        for(int i =0;i < (max_title_width + max_name_width + max_phone_width + 90);i++){
+             printf("-");
+        }
+        printf("\n");
+        
+    }
+
+    sqlite3_finalize(stmt);
+    sqlite3_close(db);
+}
+
+//*******************************************************************************************************************
+
+// Search rent
+
+void searchRent() {
+    sqlite3 *db;
+    sqlite3_stmt *stmt;
+    int return_code;
+
+    return_code = sqlite3_open(DATABASE_FILE, &db);
+    if (return_code) {
+        fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
+        sqlite3_close(db);
+        return;
+    }
+
+    char searchTerm[MAX_TITLE_LENGTH];
+    printf("Enter search term (title, name or phone): ");
+    scanf(" %[^\n]s", searchTerm);
+
+    const char *sql = "SELECT id, title, Name, Phone, quantity_rented, rented_for_days, rent_date, return_date FROM rents WHERE title LIKE ? OR Name LIKE ? OR Phone LIKE ?;";
+     
+    return_code = sqlite3_prepare_v2(db, sql, -1, &stmt, 0);
+    if (return_code != SQLITE_OK) {
+        fprintf(stderr, "Failed to execute statement: %s\n", sqlite3_errmsg(db));
+        sqlite3_close(db);
+        return;
+    }
+
+    // Calculate maximum widths for each column
+    int max_title_width = 0;
+    int max_name_width = 0;
+    int max_phone_width = 0;
+    int max_qty_rented = 0;
+    int max_rfd_width = 17;
+    int max_rentdate_width = 0;
+    int max_returndate_width = 0;
+    // Bind search term to the prepared statement
+    sqlite3_bind_text(stmt, 1, searchTerm, -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 2, searchTerm, -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 3, searchTerm, -1, SQLITE_STATIC);
+
+    // Fetch data to calculate maximum widths
+    while ((return_code = sqlite3_step(stmt)) == SQLITE_ROW) {
+        max_title_width = fmax(max_title_width, (int)strlen((const char *)sqlite3_column_text(stmt, 1)));
+        max_name_width = fmax(max_name_width, (int)strlen((const char *)sqlite3_column_text(stmt, 2)));
+        max_phone_width = fmax(max_phone_width, (int)strlen((const char *)sqlite3_column_text(stmt, 3)));
+        max_qty_rented = fmax(max_qty_rented, sqlite3_column_int(stmt, 4));
+        max_rentdate_width = fmax(max_rentdate_width, (int)strlen((const char *)sqlite3_column_text(stmt, 6)));
+        max_returndate_width = fmax(max_returndate_width, (int)strlen((const char *)sqlite3_column_text(stmt, 7)));
+    }
+
+    // Reset the statement to re-execute
+    sqlite3_reset(stmt);
+
+    printf("\n***** Search Results ******\n");
+    printf("%s",BLUE);
+    for(int i =0;i < (max_title_width + max_name_width + max_phone_width + 90);i++){
+        printf("-");
+    }
+    printf("%s\n",RESET);
+
+    // Print column headers
+    printf("%s %-7s | %-*s | %-*s | %-*s | %-6s | %-15s | %-18s | %s |%s\n",
+           BLUE,"Id",
+           max_title_width, "Title",
+           max_name_width, "Name",
+           max_phone_width, "Phone",
+           "Quantity Rented",
+           "Rented for Days",
+           "Rent Date",
+           "Return Date",
+            RESET);
+
+    printf("%s",BLUE);
+    for(int i =0;i < (max_title_width + max_name_width + max_phone_width + 90);i++){
+        printf("-");
+    }
+    printf("%s\n",RESET);
+    
+    // Print search results with aligned columns    
+    while ((return_code = sqlite3_step(stmt)) == SQLITE_ROW) {
+        if(strcmp((const char *)sqlite3_column_text(stmt,1),searchTerm) == 0){
+            printf("%-8d | %s%-*s %s| %-*s | %-*s | %-15d | %-15d | %-18s | %-11s |\n",
+                sqlite3_column_int(stmt, 0),
+                GREEN,max_title_width, (const char *)sqlite3_column_text(stmt, 1),RESET,
+                max_name_width, (const char *)sqlite3_column_text(stmt, 2),
+                max_phone_width, (const char *)sqlite3_column_text(stmt, 3),
+                sqlite3_column_int(stmt, 4),
+                sqlite3_column_int(stmt, 5),
+                sqlite3_column_text(stmt, 6),
+                sqlite3_column_text(stmt, 7));
+        for(int i =0;i < (max_title_width + max_name_width + max_phone_width + 90);i++){
+            printf("-");
+        }
+        printf("\n");
+        }
+        else if(strcmp((const char *)sqlite3_column_text(stmt,2),searchTerm) == 0){
+            printf("%-8d | %-*s | %s%-*s %s| %-*s | %-15d | %-15d | %-18s | %-11s |\n",
+                sqlite3_column_int(stmt,0),
+                max_title_width, (const char *)sqlite3_column_text(stmt, 1),
+                GREEN,max_name_width, (const char *)sqlite3_column_text(stmt, 2),RESET,
+                max_phone_width, (const char *)sqlite3_column_text(stmt, 3),
+                sqlite3_column_int(stmt, 4),
+                sqlite3_column_int(stmt, 5),
+                sqlite3_column_text(stmt, 6),
+                sqlite3_column_text(stmt, 7));
+
+        for(int i =0;i < (max_title_width + max_name_width + max_phone_width + 90);i++){
+            printf("-");
+        }
+        printf("\n");
+        }
+        else if(strcmp((const char *)sqlite3_column_text(stmt,3),searchTerm) == 0){
+            printf("%-8d | %-*s | %-*s | %s%-*s %s| %-15d | %-15d | %-18s | %-11s | \n",
+                sqlite3_column_int(stmt,0),
+                max_title_width, (const char *)sqlite3_column_text(stmt, 1),
+                max_name_width, (const char *)sqlite3_column_text(stmt, 2),
+                GREEN,max_phone_width, (const char *)sqlite3_column_text(stmt, 3),RESET,
+                sqlite3_column_int(stmt, 4),
+                sqlite3_column_int(stmt, 5),
+                sqlite3_column_text(stmt, 6),
+                sqlite3_column_text(stmt, 7));
+
+        for(int i =0;i < (max_title_width + max_name_width + max_phone_width + 90);i++){
+            printf("-");
+        }
+        printf("\n");
+        }
+    }
+
+    sqlite3_finalize(stmt);
+    sqlite3_close(db);
+}
+
+//************************************************************************************************************
+
+//Recall a rent
+
+
+void rentRecall() {
+    sqlite3 *db;
+    sqlite3_stmt *stmt;
+    char *errMsg = 0;
+    int return_code;
+    int id;
+    char title[MAX_TITLE_LENGTH];
+
+    return_code = sqlite3_open(DATABASE_FILE, &db);
+    if (return_code) {
+        fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
+        sqlite3_close(db);
+        return;
+    }
+
+    do{
+        printf("Enter the id of the rent to recall: ");
+        scanf("%d", &id);
+    }while (!validateID(id)); // Assume validateId validates against valid id range in the database
+
+    char sql[1000];
+    sprintf(sql, "SELECT title FROM rents WHERE id='%d';", id);
+
+    return_code = sqlite3_prepare_v2(db, sql, -1, &stmt, 0);
+    if (return_code != SQLITE_OK) {
+        fprintf(stderr, "SQL error: %s\n", sqlite3_errmsg(db));
+        sqlite3_close(db);
+        return;
+    }
+
+    return_code = sqlite3_step(stmt);
+    if (return_code == SQLITE_ROW) {
+        strcpy(title, (const char *)sqlite3_column_text(stmt, 0));
+    } else {
+        fprintf(stderr, "No rent found with id %d\n", id);
+        sqlite3_finalize(stmt);
+        sqlite3_close(db);
+        return;
+    }
+
+    sqlite3_finalize(stmt);
+
+    char sql2[1000];
+    char sql3[1000];
+    sprintf(sql2, "UPDATE books SET quantity_rented = quantity_rented - 1, quantity_available = quantity_available + 1 WHERE title='%s';", title);
+    sprintf(sql3, "DELETE FROM rents WHERE id='%d';", id);
+
+    return_code = sqlite3_exec(db, sql2, 0, 0, &errMsg);
+    if (return_code != SQLITE_OK) {
+        fprintf(stderr, "SQL error: %s\n", errMsg);
+        sqlite3_free(errMsg);
+    }
+
+    return_code = sqlite3_exec(db, sql3, 0, 0, &errMsg);
+    if (return_code != SQLITE_OK) {
+        fprintf(stderr, "SQL error: %s\n", errMsg);
+        sqlite3_free(errMsg);
+    } else {
+        printf("%sRent recalled successfully.\n%s", GREEN, RESET);
     }
 
     sqlite3_close(db);

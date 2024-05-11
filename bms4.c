@@ -54,7 +54,7 @@ int initializeDatabase() {
                             "username TEXT NOT NULL,"
                             "password TEXT NOT NULL,"
                             "email TEXT NOT NULL,"
-                            "role INTEGER NOT NULL"
+                            "role INTEGER NOT NULL" 
                             ");";
 
     // Execute SQL statement to create users table
@@ -219,10 +219,6 @@ void advancedCLI() {
             // Call function to login
             sellBook();
         }  
-        else if (strcmp(command, "login") == 0) {
-            // Call function to login
-            authenticateUser();
-        }
         else if (strcmp(command, "del user") == 0) {
             // Call function to delete user
             delUser();
@@ -236,16 +232,43 @@ void advancedCLI() {
         else if (strcmp(command, "rent book") == 0){
             // Call function to rent books
             rentBook();
+        } else if (strcmp(command, "rent recall") == 0){
+            // Call function to recall rented books 
+            rentRecall();    
         }
-        else if (strcmp(command, "rent recall") == 0){
-            // Call function to recall rented books
-            
+        else if (strcmp(command, "show rents") == 0){
+            // Call function to display rents
+            displayRent();
+        }else if (strcmp(command, "show books") == 0) {
+            // Call function to display all books
+            displayBooks();
+        }else if (strcmp(command, "show users") == 0) {
+            // Call function to display all users
+            displayUsers();
+        }
+        else if (strcmp(command, "search rent") == 0){
+            // Call function to search rented books
+            searchRent();
+
+        }else if (strcmp(command, "search book") == 0) {
+            // Call function to display all users
+            searchBook();
+        }else if (strcmp(command, "report sales") == 0) {
+            // Call function to display all users
+            generateSalesReport();
+        }else if (strcmp(command, "report rents") == 0) {
+            // Call function to display all users
+            searchBook();
+        }
+        else if (strcmp(command, "whoami") == 0) {
+            whoami();
         }
          else if (strcmp(command, "help add") == 0) {
             help("add");
         } else if (strcmp(command, "help del") == 0) {
             help("del");
-        } else if (strcmp(command, "help show") == 0) {
+        } 
+        else if (strcmp(command, "help show") == 0) {
             help("show");
         } else if (strcmp(command, "help login") == 0) {
             help("login");
@@ -262,11 +285,10 @@ void advancedCLI() {
             help("search");
         }else if (strcmp(command, "update") == 0) {
             help("update");
-        }
-        else if (strcmp(command, "login") == 0) {
-            help("login ");
-        } else if (strcmp(command, "whoami") == 0) {
-            whoami();
+
+        }else if (strcmp(command, "rent") == 0) {
+            help("rent");
+
         }
         else if (strcmp(command, "del") == 0) {
             help("del");
@@ -280,16 +302,8 @@ void advancedCLI() {
         else if (strcmp(command, "help") == 0) {
             help("all");
         }
-        else if (strcmp(command, "show books") == 0) {
-            // Call function to display all books
-            displayBooks();
-        } else if (strcmp(command, "show users") == 0) {
-            // Call function to display all users
-            displayUsers();
-        }else if (strcmp(command, "search book") == 0) {
-            // Call function to display all users
-            searchBook();
-        }
+
+
          else if (strcmp(command, "back") == 0) {
             // Call function to go back
             friendlyCLI();
@@ -299,7 +313,7 @@ void advancedCLI() {
         } 
         else {
             if (strlen(command) > 0) {
-                printf("Invalid command: %s\n", command);
+                printf("%sInvalid command:%s %s\n",RED,RESET,command);
             }
         }
     } while (true);
@@ -341,20 +355,41 @@ void friendlyCLI(){
                 rentBook();
                 break;
             case 8:
-                // generateRentalReport();
+                rentRecall();
                 break;
             case 9:
-                advancedCLI();
+                displayRent();
                 break;
             case 10:
-                addUser();
+                searchRent();
                 break;
+            case 11:
+                //Rent report
+                break;
+            case 12:
+                advancedCLI();
             case 0:
                 printf("Exiting program. Goodbye!\n");
                 break;
             default:
-                printf("Invalid choice. Please try again.\n");
+                printf("%sInvalid choice.%s Please try again.\n",RED,RESET);
         }
+        /*    printf("\n*********** Bookshop Management System ***********\n");
+    printf("1. Add a Book\n");
+    printf("2. Display All Books\n");
+    printf("3. Search for a Book\n");
+    printf("4. Update Book Details\n");
+    printf("5. Sell a Book\n");
+    printf("6. Generate Sales Report\n");
+    printf("7. Rent a Book\n");
+    printf("8. Recall a Rent\n");
+    printf("9. Display all Rents\n");
+    printf("10. Search for a rent\n");
+    printf("11. Generate Rental Report\n");
+    printf("12. Advanced CLI\n");
+    printf("0. Exit\n");
+    printf("******************************************************\n");
+    printf("Enter your choice: ");*/
     } while(choice != 0);
     
 }
