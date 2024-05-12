@@ -2,7 +2,7 @@
 #include <time.h>
 
 int main() {
-    char date_string[11]; // 10 characters for the date + 1 for the null terminator
+    char date_string[11]; 
     time_t t = time(NULL);
     struct tm *today = localtime(&t);
     

@@ -4,6 +4,7 @@
 #include <stdbool.h> 
 #include <sqlite3.h>
 #include <math.h>
+#include <ctype.h>
 #include <time.h>
 #include <unistd.h>
 #include <openssl/evp.h>
@@ -148,7 +149,7 @@ void print_colored_line(const char *line, const char *foreground_color, const ch
     printf("\033[%s;%sm%s\033[0m\n", foreground_color, background_color, line);
 }
 
-// Intro for the Guess Num game.
+// Intro for the Bookery BMS.
 void introBookery() {
 
     // Define color codes.
@@ -194,19 +195,20 @@ void introBookery() {
 
 void printMenu() {
     printf("\n*********** Bookshop Management System ***********\n");
-    printf("1. Add a Book\n");
-    printf("2. Display All Books\n");
-    printf("3. Search for a Book\n");
-    printf("4. Update Book Details\n");
-    printf("5. Sell a Book\n");
-    printf("6. Generate Sales Report\n");
-    printf("7. Rent a Book\n");
-    printf("8. Recall a Rent\n");
-    printf("9. Display all Rents\n");
-    printf("10. Search for a rent\n");
-    printf("11. Generate Rental Report\n");
-    printf("12. Advanced CLI\n");
-    printf("0. Exit\n");
+    printf("1.  Add a Book\n");
+    printf("2.  Display All Books\n");
+    printf("3.  Search for a Book\n");
+    printf("4.  Update Book Details\n");
+    printf("5.  Sell a Book\n");
+    printf("6.  Generate Sales Report\n");
+    printf("7.  Rent a Book\n");
+    printf("8.  Recall a Rent\n");
+    printf("9.  Display all Rents\n");
+    printf("10. Display late rent returns\n");
+    printf("11. Search for a rent\n");
+    printf("12. Generate Rental Report\n");
+    printf("13. Advanced CLI\n");
+    printf("0.  Exit\n");
     printf("******************************************************\n");
     printf("Enter your choice: ");
 }
@@ -242,7 +244,7 @@ void help(const char *command) {
         printf("Description: Sell a book.\n");
     }
     else if (strcmp(command, "rent") == 0) {
-        printf("Usage: rent [book/recall]\n");
+        printf("Usage: rent [book/recall/late]\n");
         printf("Description: Rent or recall a book\n");
     }
      else if(strcmp(command,"all") == 0){
@@ -259,13 +261,15 @@ void help(const char *command) {
         printf("10.   search rent     -       Search for a rent record\n");
         printf("11.   update book     -       Update the details of a book.\n");
         printf("12.   update user     -       Update the details of a user.\n"); 
-        printf("12.   rent book       -       Rent a book\n");
+        printf("13.   rent book       -       Rent a book\n");
         printf("14.   rent recall     -       Recall a rented book\n");
-        printf("15.   report sales    -       Generate sales report.\n"); 
-        printf("16.   report rents    -       Generate sales report.\n"); 
-        printf("17.   back            -       Go back to the previous menu\n");
-        printf("18.   login           -       Login to another account.\n");
-        printf("19.   exit            -       Exit the program\n");
+        printf("15.   rent late       -       Display Late rent returns\n");
+        printf("16.   report sales    -       Generate sales report.\n"); 
+        printf("17.   report rents    -       Generate sales report.\n"); 
+        printf("18.   back            -       Go back to the previous menu\n");
+        printf("19.   login           -       Login to another account.\n");
+        printf("20.   help            -       Shows this help message\n");
+        printf("21.   exit            -       Exit the program\n\n");
     } 
     else {
         printf("%sInvalid command:%s %s\n",RED,RESET,command);
