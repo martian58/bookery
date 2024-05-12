@@ -83,7 +83,7 @@ bool validatePrice(float price) {
 bool validateQuantity(int quantity) {
 
     if (quantity < 0) {
-        printf("%sQuantity must be non-negative. Please try again.\n%s");
+        printf("%sQuantity must be non-negative.\n%s",RED,RESET);
         return false;
     }
     return true;
@@ -93,7 +93,7 @@ bool validateQuantity(int quantity) {
 bool validateDays(int days) {
 
     if (days < 0) {
-        printf("%sDays must be non-negative. Please try again.\n%s");
+        printf("%sDays must be non-negative.\n%s",RED,RESET);
         return false;
     }
     return true;
@@ -102,7 +102,7 @@ bool validateDays(int days) {
 bool validateID(int id) {
 
     if (id < 0) {
-        printf("%sDays must be non-negative. Please try again.\n%s");
+        printf("%sId must be non-negative.\n%s",RED,RESET);
         return false;
     }
     return true;

@@ -333,7 +333,7 @@ void delUser() {
         // Prompt the admin to enter the username of the user to be deleted.
         do{
             printf("Enter the user to delete: ");
-            scanf(" %[^\n]s", &del_username);
+            scanf(" %[^\n]s", del_username);
         }while(!validateUsername(del_username));
 
         // Construct SQL query to delete the user from the database.

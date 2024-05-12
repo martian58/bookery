@@ -550,7 +550,7 @@ void delBook(int mode) {
             // Loop until a valid book title is entered.
             do {
                 printf("Enter the book to delete: ");
-                scanf(" %[^\n]s", &del_book);
+                scanf(" %[^\n]s", del_book);
             } while (!validateUsername(del_book));
 
             char sql[1000];
@@ -649,7 +649,7 @@ void rentBook() {
     // Prompt user to enter the title of the book to rent and validate it
     do {
         printf("Enter the title of the book to rent: ");
-        scanf(" %[^\n]s", &newRent.title);
+        scanf(" %[^\n]s", newRent.title);
     } while (!validateTitle(newRent.title));
 
     // Prompt user to enter the name of the customer and validate it
@@ -666,7 +666,7 @@ void rentBook() {
 
     // Prompt user to enter the phone number of the customer
     printf("Enter phone number of customer: ");
-    scanf("%s", &newRent.customer_phone);
+    scanf("%s", newRent.customer_phone);
     
     // Prompt user to enter the number of days to rent and validate it
     do {
