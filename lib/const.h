@@ -1,3 +1,10 @@
+/*
+ * File:          const.h
+ * Authors:       Fuad Alizada, Mehdi Hasanli, Toghrul Abdullazada, Tural Gadirov, Ilham Bakhishov
+ * Date:          May 08, 2024
+ * Description:   File contains globaly constant functions and variables. 
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -9,7 +16,7 @@
 #include <unistd.h>
 #include <openssl/evp.h>
 
-char *VERSION = "1.1.0";
+char *VERSION = "1.1.5";
 
 char *RED = "\033[1;31m"; 
 char *GREEN = "\033[1;32m"; 
@@ -213,6 +220,8 @@ void printMenu() {
     printf("Enter your choice: ");
 }
 
+
+// Function to show help message for available commands.
 void help(const char *command) {
 
     if (strcmp(command, "del") == 0) {
@@ -245,31 +254,45 @@ void help(const char *command) {
     }
     else if (strcmp(command, "rent") == 0) {
         printf("Usage: rent [book/recall/late]\n");
-        printf("Description: Rent or recall a book\n");
+        printf("Description: Rent or recall a book.\n");
+    }
+    else if (strcmp(command, "report") == 0) {
+        printf("Usage: report [sales/rents]\n");
+        printf("Description:  Generate report for sales or rents.\n");
+
+    }else if (strcmp(command, "whoami") == 0) {
+        printf("Usage: whoami\n");
+        printf("Description:  Display the username and role.\n");
+
+    }else if (strcmp(command, "clear") == 0) {
+        printf("Usage: clear\n");
+        printf("Description:  Clear the screen.\n");
     }
      else if(strcmp(command,"all") == 0){
-        printf("%s*****Available commands******\n\n%s",BLUE,RESET);
-        printf("1.    add user        -       Add a new user\n");
-        printf("2.    add book        -       Add a new book\n");
-        printf("3.    del user        -       Delete a user\n");
-        printf("4.    del book        -       Delete a book\n");
+        printf("%s\n*****Available commands******\n\n%s",BLUE,RESET);
+        printf("1.    add user        -       Add a new user.\n");
+        printf("2.    add book        -       Add a new book.\n");
+        printf("3.    del user        -       Delete a user.\n");
+        printf("4.    del book        -       Delete a book.\n");
         printf("5.    del allbooks    -       Delete all the books(%sno return%s).\n",RED,RESET);
-        printf("6.    show books      -       Display all books\n");
-        printf("7.    show users      -       Display all users\n");
-        printf("8.    show rents      -       Display all rents\n");
+        printf("6.    show books      -       Display all books.\n");
+        printf("7.    show users      -       Display all users.\n");
+        printf("8.    show rents      -       Display all rents.\n");
         printf("9.    search book     -       Search for a book.\n");
-        printf("10.   search rent     -       Search for a rent record\n");
+        printf("10.   search rent     -       Search for a rent record.\n");
         printf("11.   update book     -       Update the details of a book.\n");
         printf("12.   update user     -       Update the details of a user.\n"); 
-        printf("13.   rent book       -       Rent a book\n");
-        printf("14.   rent recall     -       Recall a rented book\n");
-        printf("15.   rent late       -       Display Late rent returns\n");
+        printf("13.   rent book       -       Rent a book.\n");
+        printf("14.   rent recall     -       Recall a rented book.\n");
+        printf("15.   rent late       -       Display Late rent returns.\n");
         printf("16.   report sales    -       Generate sales report.\n"); 
         printf("17.   report rents    -       Generate sales report.\n"); 
-        printf("18.   back            -       Go back to the previous menu\n");
-        printf("19.   login           -       Login to another account.\n");
-        printf("20.   help            -       Shows this help message\n");
-        printf("21.   exit            -       Exit the program\n\n");
+        printf("18.   whoami          -       Display the username and role.\n"); 
+        printf("19.   clear          -        Clear the screen.\n"); 
+        printf("20.   back            -       Go back to the previous menu.\n");
+        printf("21.   login           -       Login to another account.\n");
+        printf("22.   help            -       Shows this help message.\n");
+        printf("23.   exit            -       Exit the program.\n\n");
     } 
     else {
         printf("%sInvalid command:%s %s\n",RED,RESET,command);

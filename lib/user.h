@@ -1,3 +1,10 @@
+/*
+ * File:          user.h
+ * Authors:       Fuad Alizada, Mehdi Hasanli, Toghrul Abdullazada, Tural Gadirov, Ilham Bakhishov
+ * Date:          May 08, 2024
+ * Description:   File contains functions necessery for managing employee accouts in the system
+ *                Authentication, Login, Determination of user roles etc. 
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -121,7 +128,7 @@ void updateUser() {
     sqlite3_bind_text(stmt, 2, updatedUser.email, -1, SQLITE_STATIC);
 
     sqlite3_bind_int(stmt, 3, updatedUser.role);
-    
+
     sqlite3_bind_text(stmt, 4, searchUser, -1, SQLITE_STATIC);
 
     // Execute the SQL statement

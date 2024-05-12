@@ -16,6 +16,8 @@ Bookery is a bookshop management system implemented in C. It provides functional
 ### Clone the repository
 ```bash
 git clone https://github.com/martian58/bookery.git
+
+cd bookery
 ```
 ### Linux
 

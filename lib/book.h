@@ -1,3 +1,11 @@
+/*
+ * File:          book.h
+ * Authors:       Fuad Alizada, Mehdi Hasanli, Toghrul Abdullazada, Tural Gadirov, Ilham Bakhishov
+ * Date:          May 09, 2024
+ * Description:   File contains functions for managing the books inventory. 
+ */
+ 
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -7,7 +15,6 @@
 #include <time.h>
 #include <unistd.h>
 #include <openssl/evp.h>
-
 
 #include "const.h"
 
@@ -954,6 +961,7 @@ void searchRent() {
                 sqlite3_column_int(stmt, 5),
                 sqlite3_column_text(stmt, 6),
                 sqlite3_column_text(stmt, 7));
+                
         } else if(strcmp((const char *)sqlite3_column_text(stmt,2),searchTerm) == 0){
             printf("%-8d | %-*s | %s%-*s %s| %-*s | %-15d | %-15d | %-18s | %-11s |\n",
                 sqlite3_column_int(stmt,0),
@@ -976,11 +984,10 @@ void searchRent() {
                 sqlite3_column_text(stmt, 7));
         }
         // Print horizontal line separator
-        printf("%s", BLUE);
         for(int i =0;i < (max_title_width + max_name_width + max_phone_width + 90);i++){
             printf("-");
         }
-        printf("%s\n", RESET);
+        printf("\n");
     }
 
     // Finalize the SQLite statement

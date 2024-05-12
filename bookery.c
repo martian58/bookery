@@ -339,36 +339,47 @@ void advancedCLI() {
         if (strcmp(command, "add user") == 0) {
             // Call function to add user.
             addUser();
+            
         } else if (strcmp(command, "add book") == 0) {
             // Call function to add book.
             addBook();
+
         } else if (strcmp(command, "login") == 0) {
             // Call function to login.
             authenticateUser();
+
         } else if (strcmp(command, "update book") == 0) {
             // Call function to update book.
             updateBook();
+
         } else if (strcmp(command, "update user") == 0) {
             // Call function to update user.
-            updateUser();   
+            updateUser();  
+
         } else if (strcmp(command, "sell book") == 0) {
             // Call function to sell book.
             sellBook();
+
         } else if (strcmp(command, "del user") == 0) {
             // Call function to delete user.
             delUser();
+
         } else if (strcmp(command, "del book") == 0) {
             // Call function to delete book.
             delBook(1);
+
         } else if (strcmp(command, "del allbooks") == 0) {
             // Call function to delete all books.
             delBook(0);
+
         } else if (strcmp(command, "rent book") == 0){
             // Call function to rent books.
             rentBook();
+
         } else if (strcmp(command, "rent recall") == 0){
             // Call function to recall rented books.
-            rentRecall();    
+            rentRecall();  
+
         } else if (strcmp(command, "rent late") == 0){
             // Call function to recall rented books.
             rentLate();   
@@ -376,81 +387,123 @@ void advancedCLI() {
         else if (strcmp(command, "show rents") == 0){
             // Call function to display rents.
             displayRent();
+
         } else if (strcmp(command, "show books") == 0) {
             // Call function to display all books.
             displayBooks();
+
         } else if (strcmp(command, "show users") == 0) {
             // Call function to display all users.
             displayUsers();
+
         } else if (strcmp(command, "search rent") == 0){
             // Call function to search rented books.
             searchRent();
+
         } else if (strcmp(command, "search book") == 0) {
             // Call function to search for books.
             searchBook();
+
         } else if (strcmp(command, "report sales") == 0) {
             // Call function to generate sales report.
             generateSalesReport();
+
         } else if (strcmp(command, "report rents") == 0) {
             // Call function to generate rental report.
             generateRentalReport();
+
         } else if (strcmp(command, "whoami") == 0) {
             // Call function to display current user information.
             whoami();
+
         } else if (strcmp(command, "help add") == 0) {
             // Display help for add commands.
             help("add");
+
         } else if (strcmp(command, "help del") == 0) {
             // Display help for del commands.
             help("del");
+
         } else if (strcmp(command, "help show") == 0) {
             // Display help for show commands.
             help("show");
+
         } else if (strcmp(command, "help login") == 0) {
             // Display help for login command.
             help("login");
+
         } else if (strcmp(command, "help search") == 0) {
             // Display help for search commands.
             help("search");
+
         } else if (strcmp(command, "help update") == 0) {
             // Display help for update commands.
             help("update");
+
         } else if (strcmp(command, "help sell") == 0) {
             // Display help for sell command.
             help("sell");
+
         } else if (strcmp(command, "help rent") == 0) {
             // Display help for rent command.
             help("rent");
-        } else if (strcmp(command, "search") == 0) {
+            
+        } else if (strcmp(command, "help report") == 0) {
+            // Display help for rent command.
+            help("report");
+
+        } else if (strcmp(command, "help whoami") == 0) {
+            // Display help for rent command.
+            help("whoami");
+
+        } else if (strcmp(command, "help clear") == 0) {
+            // Display help for rent command.
+            help("clear");
+        }  
+        else if (strcmp(command, "search") == 0) {
             // Display help for search command.
             help("search");
+
         } else if (strcmp(command, "update") == 0) {
             // Display help for update command.
             help("update");
+
         } else if (strcmp(command, "rent") == 0) {
             // Display help for rent command.
             help("rent");
+
         } else if (strcmp(command, "del") == 0) {
             // Display help for del command.
             help("del");
+            
         } else if (strcmp(command, "add") == 0) {
             // Display help for add command.
             help("add");
+
         } else if (strcmp(command, "show") == 0) {
             // Display help for show command.
             help("show");
+
         } else if (strcmp(command, "sell") == 0) {
             // Display help for sell command.
             help("sell");
-        } else if (strcmp(command, "help") == 0) {
+
+        } else if (strcmp(command, "report") == 0) {
+            // Display help for report command.
+            help("report");
+        }
+         else if (strcmp(command, "help") == 0) {
             // Display general help.
             help("all");
+
         } else if (strcmp(command, "back") == 0) {
             // Return to the friendly CLI.
             friendlyCLI();
+
         } else if (strcmp(command, "clear") == 0) {
             // Clear the screen and reset the advanced CLI.
             advancedCLI();
+
         } else if (strcmp(command, "exit") == 0) {
             // Clear the screen and reset the advanced CLI.
             printf("\n\nbye!\n");
