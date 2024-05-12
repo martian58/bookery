@@ -13,6 +13,10 @@ Bookery is a bookshop management system implemented in C. It provides functional
 
 ## Installation
 
+### Clone the repository
+```bash
+git clone https://github.com/martian58/bookery.git
+```
 ### Linux
 
 1. Install the SQLite development library:
@@ -50,7 +54,7 @@ brew install openssl
 
 Compile the code using GCC:
 ```bash
-gcc bookery.c -o bookery -lsqlite3 -lssl -lcrypto
+gcc bookery.c -o bookery -lsqlite3 -lssl -lm -lcrypto
 ```
 **Note:** Compiled executable present in the repository is for debian based linux distrobutions.
 
