@@ -754,109 +754,109 @@ void rentBook() {
  * 
  * @return void
  */
-    void displayRent() {
-        sqlite3 *db; // SQLite database pointer
-        sqlite3_stmt *stmt; // SQLite statement pointer
-        int return_code; // Return code from SQLite functions
+void displayRent() {
+    sqlite3 *db; // SQLite database pointer
+    sqlite3_stmt *stmt; // SQLite statement pointer
+    int return_code; // Return code from SQLite functions
 
-        // Open the SQLite database
-        return_code = sqlite3_open(DATABASE_FILE, &db);
-        if (return_code != SQLITE_OK) {
-            // If opening the database fails, print error message, close the database, and return
-            fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
-            sqlite3_close(db);
-            return;
-        }
-
-        printf("\n********** List of Rents **************\n");
-
-        // SQL query to select rent information
-        const char *sql = "SELECT id, title, Name, Phone, quantity_rented, rented_for_days, rent_date, return_date FROM rents;";
-        return_code = sqlite3_prepare_v2(db, sql, -1, &stmt, 0);
-        if (return_code != SQLITE_OK) {
-            // If preparing the SQL statement fails, print error message, close the database, and return
-            fprintf(stderr, "Failed to execute statement: %s\n", sqlite3_errmsg(db));
-            sqlite3_close(db);
-            return;
-        }
-
-        // Calculate maximum widths for each column
-        int max_title_width = 0;
-        int max_name_width = 0;
-        int max_phone_width = 0;
-        int max_qty_rented = 0;
-        int max_rfd_width = 17; // Assuming "Rented for Days" width is fixed
-        int max_rentdate_width = 0;
-        int max_returndate_width = 0;
-
-        // Iterate through the result set to calculate maximum widths
-        while ((return_code = sqlite3_step(stmt)) == SQLITE_ROW) {  
-            max_title_width = fmax(max_title_width, (int)strlen((const char *)sqlite3_column_text(stmt, 1)));
-            max_name_width = fmax(max_name_width, (int)strlen((const char *)sqlite3_column_text(stmt, 2)));
-            max_phone_width = fmax(max_phone_width, (int)strlen((const char *)sqlite3_column_text(stmt, 3)));
-            max_qty_rented = fmax(max_qty_rented, sqlite3_column_int(stmt, 4));
-            max_rentdate_width = fmax(max_rentdate_width, (int)strlen((const char *)sqlite3_column_text(stmt, 6)));
-            max_returndate_width = fmax(max_returndate_width, (int)strlen((const char *)sqlite3_column_text(stmt, 7)));
-        }
-
-        // Print horizontal line separator
-        printf("%s", BLUE);
-        for(int i =0;i < (max_title_width + max_name_width + max_phone_width + 90);i++){
-            printf("-");
-        }
-        printf("%s\n", RESET);
-
-        // Print column headers
-        printf("%s %-7s | %-*s | %-*s | %-*s | %-6s | %-15s | %-18s | %s |%s\n",
-            BLUE,"Id",
-            max_title_width, "Title",
-            max_name_width, "Name",
-            max_phone_width, "Phone",
-            "Quantity Rented",
-            "Rented for Days",
-            "Rent Date",
-            "Return Date",
-                RESET);
-
-        // Print horizontal line separator
-        printf("%s", BLUE);
-        for(int i =0;i < (max_title_width + max_name_width + max_phone_width + 90);i++){
-            printf("-");
-        }
-        printf("%s\n", RESET);
-
-        // Print rent data
-        sqlite3_reset(stmt); // Reset the statement to re-execute
-        while ((return_code = sqlite3_step(stmt)) == SQLITE_ROW) {
-            printf("%-8d | %-*s | %-*s | %-*s | %-15d | %-15d | %-18s | %-11s |\n",
-                sqlite3_column_int(stmt, 0),
-                max_title_width, (const char *)sqlite3_column_text(stmt, 1),
-                max_name_width, (const char *)sqlite3_column_text(stmt, 2),
-                max_phone_width, (const char *)sqlite3_column_text(stmt, 3),
-                sqlite3_column_int(stmt, 4),
-                sqlite3_column_int(stmt, 5),
-                sqlite3_column_text(stmt, 6),
-                sqlite3_column_text(stmt, 7));
-                
-            // Print horizontal line separator
-            for(int i =0;i < (max_title_width + max_name_width + max_phone_width + 90);i++){
-                printf("-");
-            }
-            printf("\n");
-
-        }
-
-        // Finalize the SQLite statement
-        sqlite3_finalize(stmt);
-        // Close the database connection
+    // Open the SQLite database
+    return_code = sqlite3_open(DATABASE_FILE, &db);
+    if (return_code != SQLITE_OK) {
+        // If opening the database fails, print error message, close the database, and return
+        fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
         sqlite3_close(db);
+        return;
     }
 
-    //*******************************************************************************************************************
+    printf("\n********** List of Rents **************\n");
 
-    // Search rent
+    // SQL query to select rent information
+    const char *sql = "SELECT id, title, Name, Phone, quantity_rented, rented_for_days, rent_date, return_date FROM rents;";
+    return_code = sqlite3_prepare_v2(db, sql, -1, &stmt, 0);
+    if (return_code != SQLITE_OK) {
+        // If preparing the SQL statement fails, print error message, close the database, and return
+        fprintf(stderr, "Failed to execute statement: %s\n", sqlite3_errmsg(db));
+        sqlite3_close(db);
+        return;
+    }
 
-    /**
+    // Calculate maximum widths for each column
+    int max_title_width = 0;
+    int max_name_width = 0;
+    int max_phone_width = 0;
+    int max_qty_rented = 0;
+    int max_rfd_width = 17; // Assuming "Rented for Days" width is fixed
+    int max_rentdate_width = 0;
+    int max_returndate_width = 0;
+
+    // Iterate through the result set to calculate maximum widths
+    while ((return_code = sqlite3_step(stmt)) == SQLITE_ROW) {  
+        max_title_width = fmax(max_title_width, (int)strlen((const char *)sqlite3_column_text(stmt, 1)));
+        max_name_width = fmax(max_name_width, (int)strlen((const char *)sqlite3_column_text(stmt, 2)));
+        max_phone_width = fmax(max_phone_width, (int)strlen((const char *)sqlite3_column_text(stmt, 3)));
+        max_qty_rented = fmax(max_qty_rented, sqlite3_column_int(stmt, 4));
+        max_rentdate_width = fmax(max_rentdate_width, (int)strlen((const char *)sqlite3_column_text(stmt, 6)));
+        max_returndate_width = fmax(max_returndate_width, (int)strlen((const char *)sqlite3_column_text(stmt, 7)));
+    }
+
+    // Print horizontal line separator
+    printf("%s", BLUE);
+    for(int i =0;i < (max_title_width + max_name_width + max_phone_width + 90);i++){
+        printf("-");
+    }
+    printf("%s\n", RESET);
+
+    // Print column headers
+    printf("%s %-7s | %-*s | %-*s | %-*s | %-6s | %-15s | %-18s | %s |%s\n",
+        BLUE,"Id",
+        max_title_width, "Title",
+        max_name_width, "Name",
+        max_phone_width, "Phone",
+        "Quantity Rented",
+        "Rented for Days",
+        "Rent Date",
+        "Return Date",
+            RESET);
+
+    // Print horizontal line separator
+    printf("%s", BLUE);
+    for(int i =0;i < (max_title_width + max_name_width + max_phone_width + 90);i++){
+        printf("-");
+    }
+    printf("%s\n", RESET);
+
+    // Print rent data
+    sqlite3_reset(stmt); // Reset the statement to re-execute
+    while ((return_code = sqlite3_step(stmt)) == SQLITE_ROW) {
+        printf("%-8d | %-*s | %-*s | %-*s | %-15d | %-15d | %-18s | %-11s |\n",
+            sqlite3_column_int(stmt, 0),
+            max_title_width, (const char *)sqlite3_column_text(stmt, 1),
+            max_name_width, (const char *)sqlite3_column_text(stmt, 2),
+            max_phone_width, (const char *)sqlite3_column_text(stmt, 3),
+            sqlite3_column_int(stmt, 4),
+            sqlite3_column_int(stmt, 5),
+            sqlite3_column_text(stmt, 6),
+            sqlite3_column_text(stmt, 7));
+            
+        // Print horizontal line separator
+        for(int i =0;i < (max_title_width + max_name_width + max_phone_width + 90);i++){
+            printf("-");
+        }
+        printf("\n");
+
+    }
+
+    // Finalize the SQLite statement
+    sqlite3_finalize(stmt);
+    // Close the database connection
+    sqlite3_close(db);
+}
+
+//*******************************************************************************************************************
+
+// Search rent
+
+/**
  * @brief Function to search for rented books by title, customer name, or phone number.
  * 
  * This function connects to the SQLite database, prompts the user for a search term,
