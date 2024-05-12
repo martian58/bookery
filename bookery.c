@@ -339,7 +339,7 @@ void advancedCLI() {
         if (strcmp(command, "add user") == 0) {
             // Call function to add user.
             addUser();
-            
+
         } else if (strcmp(command, "add book") == 0) {
             // Call function to add book.
             addBook();
@@ -581,6 +581,7 @@ void friendlyCLI(){
                 break;
             case 0:
                 printf("Exiting program. Goodbye!\n");
+                exit(0);    
                 break;
             default:
                 printf("%sInvalid choice.%s Please try again.\n",RED,RESET);

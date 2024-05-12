@@ -48,7 +48,7 @@ brew install openssl
 
 ### Windows
 
-1. Windows Os is not supported and not recomended.
+1. Windows Os is not supported and not recommended.
 
 
 
