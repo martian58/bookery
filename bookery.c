@@ -525,7 +525,7 @@ void advancedCLI() {
  * Users can perform various operations such as adding, displaying, updating, selling, and renting books,
  * as well as generating sales and rental reports.
  */
-void friendlyCLI(){
+void friendlyCLI() {
     printf("\033c"); // Clear the screen.
     
     // Initialize database.
@@ -534,11 +534,23 @@ void friendlyCLI(){
     }
 
     int choice;
-    
+    bool validInput;
+
     do {
+        validInput = false;
         printMenu(); // Display menu options.
-        scanf("%d", &choice); // Get user choice.
         
+        // Validate input to ensure it is a number.
+        while (!validInput) {
+            printf("bms-> ");
+            if (scanf("%d", &choice) != 1) {
+                printf("%sInvalid input.%s\n", RED, RESET);
+                clearInputBuffer();
+            } else {
+                validInput = true;
+            }
+        }
+
         switch(choice) {
             case 1:
                 addBook();
@@ -584,16 +596,18 @@ void friendlyCLI(){
                 exit(0);    
                 break;
             default:
-                printf("%sInvalid choice.%s Please try again.\n",RED,RESET);
+                printf("%sInvalid number.%s\n", RED, RESET);
         }
 
     } while(choice != 0);
 }
 
+
 int bms() {
     login();
     friendlyCLI();
 }
+
 int main(){
     bms();
     return 0;

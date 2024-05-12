@@ -216,8 +216,7 @@ void printMenu() {
     printf("12. Generate Rental Report\n");
     printf("13. Advanced CLI\n");
     printf("0.  Exit\n");
-    printf("******************************************************\n");
-    printf("Enter your choice: ");
+    printf("******************************************************\n\n");
 }
 
 
