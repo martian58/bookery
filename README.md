@@ -68,10 +68,19 @@ gcc bookery.c -o bookery -lsqlite3 -lssl -lm -lcrypto
 ./bookery
 ```
 
-
 2. Follow the on-screen instructions to use the system.
 
 3. Advanced CLI commands can be obtained by running "help" command.
+
+## Default Credentials
+
+### Admin Account
+- **Username:** admin
+- **Password:** admin
+
+### User Account
+- **Username:** mehdi
+- **Password:** mehdi
 
 
 ## Contributors
