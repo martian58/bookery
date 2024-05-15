@@ -454,11 +454,11 @@ void updateBook() {
 }
 
 
-    //***********************************************************************************************************************************************
+//***********************************************************************************************************************************************
 
     // Sell Book
 
-    /**
+ /**
  * @brief Sell a specified quantity of a book from the database.
  * 
  * This function allows the user to sell a specified quantity of a book from the database.
@@ -492,11 +492,45 @@ void sellBook() {
     } while (!validateQuantity(quantity));
 
     char sql[1000];
-    // Construct SQL statement with placeholders for quantity and title.
-    sprintf(sql, "UPDATE books SET quantity_sold = quantity_sold + ?, quantity_available = quantity_available - ? WHERE title=?;");
+    // Construct SQL statement to check if enough books are available.
+    sprintf(sql, "SELECT quantity_available FROM books WHERE title=?;");
 
     // Prepare the SQL statement.
     sqlite3_stmt *stmt;
+    return_code = sqlite3_prepare_v2(db, sql, -1, &stmt, 0);
+    if (return_code != SQLITE_OK) {
+        fprintf(stderr, "SQL error: %s\n", sqlite3_errmsg(db));
+        sqlite3_close(db);
+        return;
+    }
+
+    // Bind the title parameter to the prepared statement.
+    sqlite3_bind_text(stmt, 1, sellTitle, -1, SQLITE_STATIC);
+
+    // Execute the prepared statement.
+    return_code = sqlite3_step(stmt);
+    if (return_code == SQLITE_ROW) {
+        int available_quantity = sqlite3_column_int(stmt, 0);
+        if (available_quantity < quantity) {
+            printf("%sNot enough books available to sell.%s\n",RED,RESET);
+            sqlite3_finalize(stmt);
+            sqlite3_close(db);
+            return;
+        }
+    } else {
+        fprintf(stderr, "SQL error: %s\n", sqlite3_errmsg(db));
+        sqlite3_finalize(stmt);
+        sqlite3_close(db);
+        return;
+    }
+
+    // Finalize the statement.
+    sqlite3_finalize(stmt);
+
+    // Construct SQL statement to update quantity sold and available.
+    sprintf(sql, "UPDATE books SET quantity_sold = quantity_sold + ?, quantity_available = quantity_available - ? WHERE title=?;");
+
+    // Prepare the SQL statement.
     return_code = sqlite3_prepare_v2(db, sql, -1, &stmt, 0);
     if (return_code != SQLITE_OK) {
         fprintf(stderr, "SQL error: %s\n", sqlite3_errmsg(db));
@@ -521,6 +555,7 @@ void sellBook() {
     sqlite3_finalize(stmt);
     sqlite3_close(db);
 }
+
 
 
 /**
@@ -624,6 +659,7 @@ void rentBook() {
     sqlite3 *db; // SQLite database pointer
     char *errMsg = 0; // Error message pointer
     int return_code; // Return code from SQLite functions
+    int quantity = 1;   
 
     // Open the SQLite database
     return_code = sqlite3_open(DATABASE_FILE, &db);
@@ -651,6 +687,41 @@ void rentBook() {
         printf("Enter the title of the book to rent: ");
         scanf(" %[^\n]s", newRent.title);
     } while (!validateTitle(newRent.title));
+    char sql[1000];
+    // Construct SQL statement to check if enough books are available.
+    sprintf(sql, "SELECT quantity_available FROM books WHERE title=?;");
+
+    // Prepare the SQL statement.
+    sqlite3_stmt *stmt;
+    return_code = sqlite3_prepare_v2(db, sql, -1, &stmt, 0);
+    if (return_code != SQLITE_OK) {
+        fprintf(stderr, "SQL error: %s\n", sqlite3_errmsg(db));
+        sqlite3_close(db);
+        return;
+    }
+
+    // Bind the title parameter to the prepared statement.
+    sqlite3_bind_text(stmt, 1, newRent.title, -1, SQLITE_STATIC);
+
+    // Execute the prepared statement.
+    return_code = sqlite3_step(stmt);
+    if (return_code == SQLITE_ROW) {
+        int available_quantity = sqlite3_column_int(stmt, 0);
+        if (available_quantity < quantity) {
+            printf("%sNot enough books available to rent.%s\n",RED,RESET);
+            sqlite3_finalize(stmt);
+            sqlite3_close(db);
+            return;
+        }
+    } else {
+        fprintf(stderr, "SQL error: %s\n", sqlite3_errmsg(db));
+        sqlite3_finalize(stmt);
+        sqlite3_close(db);
+        return;
+    }
+
+    // Finalize the statement.
+    sqlite3_finalize(stmt);
 
     // Prompt user to enter the name of the customer and validate it
     do {
@@ -683,14 +754,14 @@ void rentBook() {
     newRent.quantity_rented = 1; // Set the quantity rented to 1
 
     // SQL statements to update the books table and insert a new rental record into the rents table
-    char sql[1000];
+    char sql1[1000];
     char sql2[1000];
-    sprintf(sql, "UPDATE books SET quantity_rented = quantity_rented + 1, quantity_available = quantity_available - 1, quantity_rented_all = quantity_rented_all + 1, quantity_rented_days = quantity_rented_days + ?     WHERE title=?;");
+    sprintf(sql1, "UPDATE books SET quantity_rented = quantity_rented + 1, quantity_available = quantity_available - 1, quantity_rented_all = quantity_rented_all + 1, quantity_rented_days = quantity_rented_days + ?     WHERE title=?;");
     sprintf(sql2, "INSERT INTO rents (title, Name, Phone, quantity_rented, rented_for_days, rent_date, return_date) VALUES (?, ?, ?, ?, ?, ?, ?);");
 
     // Prepare the SQL statements
     sqlite3_stmt *stmt1, *stmt2;
-    return_code = sqlite3_prepare_v2(db, sql, -1, &stmt1, 0);
+    return_code = sqlite3_prepare_v2(db, sql1, -1, &stmt1, 0);
     if (return_code != SQLITE_OK) {
         fprintf(stderr, "SQL error: %s\n", sqlite3_errmsg(db));
         sqlite3_close(db);

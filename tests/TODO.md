@@ -7,7 +7,7 @@
 
 ## Bug Fixes
 - [x] Fix segmentation error in `updateUser()` function.
-- [ ] Update `sellBook()` and `rentBook()` functions to prevent selling or renting if quantity available is 0.
+- [x] Update `sellBook()` and `rentBook()` functions to prevent selling or renting if quantity available is 0.
 
 ## Enhancements
 - [ ] Implement validation for phone numbers.
