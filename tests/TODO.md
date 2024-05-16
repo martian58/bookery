@@ -10,7 +10,7 @@
 - [x] Update `sellBook()` and `rentBook()` functions to prevent selling or renting if quantity available is 0.
 
 ## Enhancements
-- [ ] Implement validation for phone numbers.
+- [x] Implement validation for phone numbers.
 - [x] Improve error handling and messaging in various functions.
 - [ ] Add logging functionality to track important actions and errors.
 
