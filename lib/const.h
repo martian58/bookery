@@ -147,6 +147,13 @@ bool validateRole(const int role) {
     return ( role >= 0 && role <=1);
 }
 
+int callback_count(void *data, int argc, char **argv, char **azColName){
+    int *user_count = (int*)data;
+    *user_count = atoi(argv[0]);
+    return 0;
+}
+
+
 bool validateEmail(const char *email) {
     // Basic email format validation (not comprehensive)
     int at_count = 0;

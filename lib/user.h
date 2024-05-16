@@ -336,13 +336,31 @@ void delUser() {
             scanf(" %[^\n]s", del_username);
         }while(!validateUsername(del_username));
 
+        // Check if there is only one user in the database
+        int user_count;
+        char sql_count[1000];
+        sprintf(sql_count, "SELECT COUNT(*) FROM users;");
+        return_code = sqlite3_exec(db, sql_count, callback_count, &user_count, &errMsg);
+        if (return_code != SQLITE_OK) {
+            fprintf(stderr, "SQL error: %s\n", errMsg);
+            sqlite3_free(errMsg);
+            sqlite3_close(db);
+            return;
+        }
+
+        if (user_count <= 1) {
+            printf("%sYou can't delete the last user.%s\n", RED, RESET);
+            sqlite3_close(db);
+            return;
+        }
+
         // Construct SQL query to delete the user from the database.
-        char sql[1000];
-        sprintf(sql, "DELETE FROM users WHERE username=?;");
+        char sql1[1000];
+        sprintf(sql1, "DELETE FROM users WHERE username=?;");
         
         // Prepare SQL statement
         sqlite3_stmt *stmt;
-        sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
+        sqlite3_prepare_v2(db, sql1, -1, &stmt, NULL);
         sqlite3_bind_text(stmt, 1, del_username, -1, SQLITE_STATIC);
 
         // Execute SQL statement
@@ -360,6 +378,7 @@ void delUser() {
         sqlite3_close(db);
     }
 }
+
 
 
 /**
