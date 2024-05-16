@@ -736,8 +736,14 @@ void rentBook() {
     } while (!validateUsername(newRent.customer_name));
 
     // Prompt user to enter the phone number of the customer
-    printf("Enter phone number of customer: ");
-    scanf("%s", newRent.customer_phone);
+    do{
+        printf("Enter phone number of customer: ");
+        scanf("%s", newRent.customer_phone);
+        if(!validatePhone(newRent.customer_phone)){
+            printf("%sWrong phone number format.\n%s",RED,RESET);  
+        }
+    }while(!validatePhone(newRent.customer_phone));
+
     
     // Prompt user to enter the number of days to rent and validate it
     do {

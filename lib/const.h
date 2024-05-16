@@ -127,6 +127,21 @@ bool validatePassword(const char *password) {
     return true;
 }
 
+
+bool validatePhone(const char *phone) {
+    // Phone number must not be empty and must have at least 10 characters
+    if (strlen(phone) < 10) {
+        return false;
+    }
+
+    // Phone number must start with '0'
+    if (phone[0] != '0') {
+        return false;
+    }
+
+    return true;
+}
+
 bool validateRole(const int role) {
     // Role should be either 0 or 1.
     return ( role >= 0 && role <=1);
@@ -287,7 +302,7 @@ void help(const char *command) {
         printf("16.   report sales    -       Generate sales report.\n"); 
         printf("17.   report rents    -       Generate sales report.\n"); 
         printf("18.   whoami          -       Display the username and role.\n"); 
-        printf("19.   clear          -        Clear the screen.\n"); 
+        printf("19.   clear           -       Clear the screen.\n"); 
         printf("20.   back            -       Go back to the previous menu.\n");
         printf("21.   login           -       Login to another account.\n");
         printf("22.   help            -       Shows this help message.\n");
