@@ -86,3 +86,30 @@ void displayRent() {
     sqlite3_finalize(stmt);
     sqlite3_close(db);
 }
+
+
+// Function to highlight the searchTerm in the text with green color.
+const char* highlight_search_term(const char* text, const char* searchTerm){
+    const char* found = strcasestr(text, searchTerm);
+    if (found == NULL) {
+        // searchTerm not found, return original text.
+        return text;
+    }
+
+    // Allocate memory for the highlighted text.
+    char* highlighted_text = (char*)malloc(strlen(text) + 20); // Adding some extra space for ANSI color codes.
+
+    // Copy the part before the searchTerm.
+    strncpy(highlighted_text, text, found - text);
+    highlighted_text[found - text] = '\0';
+
+    // Append the searchTerm in green color.
+    strcat(highlighted_text, GREEN);
+    strcat(highlighted_text, found);
+    strcat(highlighted_text, RESET);
+
+    // Append the remaining text after the searchTerm.
+    strcat(highlighted_text, found + strlen(searchTerm));
+
+    return highlighted_text;
+}

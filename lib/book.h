@@ -330,7 +330,7 @@ void searchBook() {
     
     // Print search results with aligned columns.
     while ((return_code = sqlite3_step(stmt)) == SQLITE_ROW) {
-        if(strcmp((const char *)sqlite3_column_text(stmt,0),searchTerm) == 0){
+        if(strcasestr((const char *)sqlite3_column_text(stmt,0),searchTerm) != NULL){
             printf("%s%-*s %s| %-*s | %-*s | $%-9.2f | %-18d | %-18d | %-13d |\n",
                 GREEN,max_title_width, (const char *)sqlite3_column_text(stmt, 0),RESET,
                 max_author_width, (const char *)sqlite3_column_text(stmt, 1),
@@ -344,7 +344,7 @@ void searchBook() {
         }
         printf("\n");
         }
-        else if(strcmp((const char *)sqlite3_column_text(stmt,1),searchTerm) == 0){
+        else if(strcasestr((const char *)sqlite3_column_text(stmt,1),searchTerm) != NULL){
             printf("%-*s | %s%-*s %s| %-*s | $%-9.2f | %-18d | %-18d | %-13d |\n",
                 max_title_width, (const char *)sqlite3_column_text(stmt, 0),
                 GREEN,max_author_width, (const char *)sqlite3_column_text(stmt, 1),RESET,
@@ -359,7 +359,7 @@ void searchBook() {
         }
         printf("\n");
         }
-        else if(strcmp((const char *)sqlite3_column_text(stmt,2),searchTerm) == 0){
+        else if(strcasestr((const char *)sqlite3_column_text(stmt,2),searchTerm) != NULL){
             printf("%-*s | %-*s | %s%-*s %s| $%-9.2f | %-18d | %-18d | %-13d | \n",
                 max_title_width, (const char *)sqlite3_column_text(stmt, 0),
                 max_author_width, (const char *)sqlite3_column_text(stmt, 1),
